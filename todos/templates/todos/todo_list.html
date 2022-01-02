@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'todos/styles.css' %}?{% now 'U' %}">
+    <title>Todo List</title>
+</head>
+
+<body class="bg-light">
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header shadow-sm bg-white">
+                        <h1 class="display-5 text-info">
+                            <i class="fas fa-check-double"></i>
+                            Todos
+                        </h1>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <form action="{% url 'insert_todo_item' %}" method="post" autocomplete="off"
+                                    class="mb-2">
+                                    {% csrf_token %}
+                                    <div class="row ml-1 justify-content-end">
+                                        <div class="input-group-append text-info mr-2 mb-2">
+                                            <button type="submit" class="btn btn-sm text-info">
+                                                <i class="fa fa-plus-circle fa-lg"></i>
+                                                Add Task
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="content"
+                                            placeholder="Go to Shop.." />
+                                    </div>
+                                </form>
+                            </li>
+                            {% for todo in todo_list %}
+                            <li class="list-group-item {{ todo.is_completed|yesno:"item-completed," }}">{{ todo.content }}
+                                <span class="float-right">
+                                    <form action="{% url 'mark_todo_item' todo.id %}" method="post"
+                                        class="float-right mr-0">
+                                        {% csrf_token %}
+                                        <input class="form-check-input" type="checkbox" value="{{ todo.id }}"
+                                            name="is_completed" id="flexCheckDefault" {{ todo.is_completed|yesno:"checked,''" }} />
+                                    </form>
+                                </span>
+                                <form action="{% url 'delete_todo_item' todo.id %}" method="post"
+                                    class="float-right mr-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn">
+                                        <i class="far fa-trash-alt fa-lg text-danger float-right"></i>
+                                    </button>
+                                </form>
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item">
+                                No TO-DO added. Try and add a TO-DO item!
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var checkbox = document.querySelector('#flexCheckDefault');
+        checkbox.addEventListener("click", sendData);
+        function sendData(event) {
+            event.preventDefault();
+            var isChecked = event.target.checked;
+            var todo_id = Number(event.target.value);
+            var $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+            fetch('http://127.0.0.1:8000/todos/mark_todo/' + todo_id + '/', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": $crf_token
+                },
+                body: JSON.stringify({
+                    'is_completed': isChecked
+                })
+            })
+            .then(resp => {
+                return resp.text();
+            })
+            .then(function(data) {
+                location.reload(true);
+            })
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
