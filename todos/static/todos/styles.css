@@ -11,4 +11,6 @@ input[name="is_completed"] {
 
 .item-completed {
     text-decoration: line-through;
+    font-style: italic;
+    color: #999;
 }

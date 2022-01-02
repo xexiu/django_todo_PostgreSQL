@@ -76,7 +76,7 @@
     </div>
     <script>
         var checkbox = document.querySelector('#flexCheckDefault');
-        checkbox.addEventListener("click", sendData);
+        checkbox && checkbox.addEventListener("click", sendData);
         function sendData(event) {
             event.preventDefault();
             var isChecked = event.target.checked;
